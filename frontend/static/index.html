@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalyst Academy - Learning Management Application</title>
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+
+  <!-- Screen Wrapper Container -->
+  <div class="app-shell" id="appShell">
+    
+    <!-- Phone Mockup Device Frame Header Bar -->
+    <div class="status-bar">
+      <span class="time" id="statusTime">09:41</span>
+      <div class="notch"></div>
+      <div class="status-icons">
+        <i class="fa-solid fa-signal"></i>
+        <i class="fa-solid fa-wifi"></i>
+        <i class="fa-solid fa-battery-full"></i>
+      </div>
+    </div>
+
+    <!-- Viewport Screen Area -->
+    <main class="viewport" id="viewport">
+
+      <!-- 1. SPLASH SCREEN -->
+      <section id="splashScreen" class="screen active">
+        <div class="splash-content">
+          <div class="splash-logo">
+            <div class="logo-icon">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1>Catalyst<span>LMS</span></h1>
+            <p>Academy Learning Management System</p>
+          </div>
+          <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. LOGIN & ROLE SWITCHER SCREEN -->
+      <section id="loginScreen" class="screen hidden">
+        <div class="login-header">
+          <div class="brand-badge"><i class="fa-solid fa-bolt"></i> Catalyst DevOps</div>
+          <h2>Welcome Back!</h2>
+          <p>Sign in or select a demo role to test</p>
+        </div>
+
+        <!-- Quick One-Click Demo Role Selector -->
+        <div class="demo-roles-card">
+          <div class="demo-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Instant Demo Login</div>
+          <div class="role-pills">
+            <button class="role-pill student-pill" onclick="quickLogin('alex@academy.edu', 'student123')">
+              <i class="fa-solid fa-user-graduate"></i> Student
+            </button>
+            <button class="role-pill teacher-pill" onclick="quickLogin('sarah@academy.edu', 'teacher123')">
+              <i class="fa-solid fa-chalkboard-user"></i> Teacher
+            </button>
+            <button class="role-pill parent-pill" onclick="quickLogin('robert@academy.edu', 'parent123')">
+              <i class="fa-solid fa-person-shelter"></i> Parent
+            </button>
+            <button class="role-pill admin-pill" onclick="quickLogin('admin@academy.edu', 'admin123')">
+              <i class="fa-solid fa-shield-halved"></i> Admin
+            </button>
+          </div>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="login-form">
+          <div class="form-group">
+            <label for="loginEmail"><i class="fa-solid fa-envelope"></i> Email Address</label>
+            <input type="email" id="loginEmail" placeholder="alex@academy.edu" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword"><i class="fa-solid fa-lock"></i> Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>Sign In</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="login-footer">
+          <p>Powered by FastAPI & Flutter DevOps Engine</p>
+        </div>
+      </section>
+
+      <!-- 3. MAIN DASHBOARD SCREEN (Multi-Role) -->
+      <section id="dashboardScreen" class="screen hidden">
+        <!-- App Top Header -->
+        <header class="app-header">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div class="user-details">
+              <h3 id="userName">Alex Vance</h3>
+              <span class="user-role-badge" id="userRoleBadge">Student</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="icon-btn" onclick="toggleNotificationsModal()">
+              <i class="fa-solid fa-bell"></i>
+              <span class="badge-dot" id="notifBadge"></span>
+            </button>
+            <button class="icon-btn logout-btn" onclick="handleLogout()" title="Logout">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Role Context Switcher Bar -->
+        <div class="role-switcher-bar">
+          <span>Switch Role View:</span>
+          <div class="mini-switcher">
+            <button onclick="switchRoleView('student')" id="btnRoleStudent" class="mini-btn">Student</button>
+            <button onclick="switchRoleView('teacher')" id="btnRoleTeacher" class="mini-btn">Teacher</button>
+            <button onclick="switchRoleView('parent')" id="btnRoleParent" class="mini-btn">Parent</button>
+            <button onclick="switchRoleView('admin')" id="btnRoleAdmin" class="mini-btn">Admin</button>
+          </div>
+        </div>
+
+        <!-- Main Viewport Content Area -->
+        <div class="dashboard-body" id="dashboardBody">
+          <!-- Dynamic Content Rendered Here via JS -->
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+          <button class="nav-item active" onclick="switchNavTab('home')" id="navHome">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+          </button>
+          <button class="nav-item" onclick="switchNavTab('courses')" id="navCourses">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Courses</span>
+          </button>
+          <button class="nav-item" onclick="switchNavTab('quiz')" id="navQuiz">
+            <i class="fa-solid fa-brain"></i>
+            <span>Quiz</span>
+          </button>
+          <button class="nav-item" onclick="switchNavTab('profile')" id="navProfile">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+          </button>
+        </nav>
+      </section>
+
+    </main>
+
+    <!-- Interactive Modals -->
+    <!-- 1. Quiz Runner Modal -->
+    <div class="modal-overlay hidden" id="quizModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="quizModalTitle">Interactive Quiz Engine</h3>
+          <button class="close-btn" onclick="closeModal('quizModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="quizModalBody">
+          <!-- Quiz Questions render here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Attendance Modal -->
+    <div class="modal-overlay hidden" id="attendanceModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Mark Class Attendance</h3>
+          <button class="close-btn" onclick="closeModal('attendanceModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="attendanceModalBody">
+          <!-- Attendance checklist renders here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Homework Modal -->
+    <div class="modal-overlay hidden" id="homeworkModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="hwModalTitle">Submit Homework Assignment</h3>
+          <button class="close-btn" onclick="closeModal('homeworkModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="homeworkModalBody">
+          <!-- Homework form renders here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Notifications Modal -->
+    <div class="modal-overlay hidden" id="notifModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Notifications & Alerts</h3>
+          <button class="close-btn" onclick="closeModal('notifModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="notifModalBody">
+          <!-- Notifications render here -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript Scripts -->
+  <script src="static/js/api.js"></script>
+  <script src="static/js/dashboards.js"></script>
+  <script src="static/js/app.js"></script>
+</body>
+</html>
