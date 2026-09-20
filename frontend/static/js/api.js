@@ -50,10 +50,10 @@ const API = {
     }
   },
 
-  // Auth Methods
-  async login(email, password) {
+  // Auth Methods: supports email or phone
+  async login(identifier, password) {
     const formData = new FormData();
-    formData.append('username', email);
+    formData.append('username', identifier.trim());
     formData.append('password', password);
 
     const data = await this.request('/auth/login', {
@@ -64,7 +64,7 @@ const API = {
       id: data.user_id,
       name: data.name,
       role: data.role,
-      email: email
+      identifier: identifier
     });
     return data;
   },
@@ -98,6 +98,23 @@ const API = {
   },
   async getQuiz(id) {
     return await this.request(`/quizzes/${id}`);
+  },
+  async createQuiz(quizData) {
+    return await this.request('/quizzes/', {
+      method: 'POST',
+      body: quizData
+    });
+  },
+  async updateQuiz(quizId, quizData) {
+    return await this.request(`/quizzes/${quizId}`, {
+      method: 'PUT',
+      body: quizData
+    });
+  },
+  async deleteQuiz(quizId) {
+    return await this.request(`/quizzes/${quizId}`, {
+      method: 'DELETE'
+    });
   },
   async submitQuiz(quizId, answers) {
     return await this.request('/quizzes/submit', {

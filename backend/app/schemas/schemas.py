@@ -31,7 +31,7 @@ class UserOut(BaseModel):
     name: str
     role: str
     phone: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -133,6 +133,14 @@ class QuizCreate(BaseModel):
     total_marks: int = 100
     duration_minutes: int = 30
     questions: List[QuestionCreate]
+
+class QuizUpdate(BaseModel):
+    course_id: Optional[int] = None
+    title: Optional[str] = None
+    total_marks: Optional[int] = None
+    duration_minutes: Optional[int] = None
+    is_active: Optional[bool] = None
+    questions: Optional[List[QuestionCreate]] = None
 
 class QuizOut(BaseModel):
     id: int

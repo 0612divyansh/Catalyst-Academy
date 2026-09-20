@@ -76,7 +76,14 @@ def seed_database():
         role="student",
         phone="+1 800-555-0403"
     )
-    db.add_all([s1_user, s2_user, s3_user])
+    s4_user = models.User(
+        email="shristhi@academy.edu",
+        hashed_password=auth_service.get_password_hash("student123"),
+        name="Shristhi Saraaf",
+        role="student",
+        phone="+1 800-555-0404"
+    )
+    db.add_all([s1_user, s2_user, s3_user, s4_user])
     db.commit()
 
     # Profiles
@@ -105,7 +112,8 @@ def seed_database():
     s1_profile = models.Student(user_id=s1_user.id, roll_number="STU-0001", grade="A+", batch_id=b1.id, parent_id=parent_profile.id)
     s2_profile = models.Student(user_id=s2_user.id, roll_number="STU-0002", grade="A", batch_id=b1.id)
     s3_profile = models.Student(user_id=s3_user.id, roll_number="STU-0003", grade="B+", batch_id=b2.id)
-    db.add_all([s1_profile, s2_profile, s3_profile])
+    s4_profile = models.Student(user_id=s4_user.id, roll_number="STU-0004", grade="A+", batch_id=b1.id)
+    db.add_all([s1_profile, s2_profile, s3_profile, s4_profile])
     db.commit()
 
     # Lessons
@@ -152,6 +160,7 @@ def seed_database():
         db.add(models.Attendance(student_id=s1_profile.id, batch_id=b1.id, date=d, status="present", marked_by="Prof. Sarah Jenkins"))
         db.add(models.Attendance(student_id=s2_profile.id, batch_id=b1.id, date=d, status="present" if d != "2026-08-05" else "absent", marked_by="Prof. Sarah Jenkins"))
         db.add(models.Attendance(student_id=s3_profile.id, batch_id=b2.id, date=d, status="present" if d != "2026-08-08" else "late", marked_by="Dr. Mark Taylor"))
+        db.add(models.Attendance(student_id=s4_profile.id, batch_id=b1.id, date=d, status="present", marked_by="Prof. Sarah Jenkins"))
     db.commit()
 
     # Homework

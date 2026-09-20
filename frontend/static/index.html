@@ -1,13 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+
+  
   <title>Catalyst Academy - Learning Management Application</title>
+  
+  <!-- Prevent FOUC Theme Flicker -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('lms_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
   <!-- Google Fonts: Outfit & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styling -->
@@ -22,10 +35,16 @@
     <div class="status-bar">
       <span class="time" id="statusTime">09:41</span>
       <div class="notch"></div>
-      <div class="status-icons">
-        <i class="fa-solid fa-signal"></i>
-        <i class="fa-solid fa-wifi"></i>
-        <i class="fa-solid fa-battery-full"></i>
+      <div class="status-right">
+        <!-- Quick Header Theme Toggle in status bar -->
+        <button class="status-theme-toggle" onclick="Theme.toggle()" title="Toggle Light / Dark Mode" id="statusThemeBtn">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <div class="status-icons">
+          <i class="fa-solid fa-signal"></i>
+          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-battery-full"></i>
+        </div>
       </div>
     </div>
 
@@ -51,62 +70,120 @@
       <!-- 2. LOGIN & ROLE SWITCHER SCREEN -->
       <section id="loginScreen" class="screen hidden">
         <div class="login-header">
-          <div class="brand-badge"><i class="fa-solid fa-bolt"></i> Catalyst DevOps</div>
+          <div class="login-top-row">
+            <div class="brand-badge"><i class="fa-solid fa-bolt"></i> Catalyst DevOps</div>
+            <button class="icon-btn theme-mini-btn" onclick="Theme.toggle()" title="Toggle Theme">
+              <i class="fa-solid fa-moon theme-icon-display"></i>
+            </button>
+          </div>
           <h2>Welcome Back!</h2>
-          <p>Sign in or select a demo role to test</p>
+          <p>Sign in with your email or phone number</p>
         </div>
 
         <!-- Quick One-Click Demo Role Selector -->
         <div class="demo-roles-card">
-          <div class="demo-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Instant Demo Login</div>
+          <div class="demo-title-row">
+            <div class="demo-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Instant Demo Login</div>
+            <span class="demo-subtitle">Click to log in as:</span>
+          </div>
           <div class="role-pills">
-            <button class="role-pill student-pill" onclick="quickLogin('alex@academy.edu', 'student123')">
-              <i class="fa-solid fa-user-graduate"></i> Student
+            <button class="role-pill student-pill" onclick="quickLogin('alex@academy.edu', 'student123', 'student')" title="Alex Vance (Student)">
+              <i class="fa-solid fa-user-graduate"></i>
+              <div class="pill-text">
+                <span class="pill-role">Student <small>(Alex)</small></span>
+                <span class="pill-id">alex@academy.edu</span>
+              </div>
             </button>
-            <button class="role-pill teacher-pill" onclick="quickLogin('sarah@academy.edu', 'teacher123')">
-              <i class="fa-solid fa-chalkboard-user"></i> Teacher
+            <button class="role-pill student-pill" onclick="quickLogin('shristhi@academy.edu', 'student123', 'student')" title="Shristhi Saraaf (Student)">
+              <i class="fa-solid fa-graduation-cap"></i>
+              <div class="pill-text">
+                <span class="pill-role">Student <small>(Shristhi)</small></span>
+                <span class="pill-id">shristhi@academy.edu</span>
+              </div>
             </button>
-            <button class="role-pill parent-pill" onclick="quickLogin('robert@academy.edu', 'parent123')">
-              <i class="fa-solid fa-person-shelter"></i> Parent
+            <button class="role-pill teacher-pill" onclick="quickLogin('+1 800-555-0201', 'teacher123', 'teacher')" title="Prof. Sarah (Phone: +1 800-555-0201)">
+              <i class="fa-solid fa-chalkboard-user"></i>
+              <div class="pill-text">
+                <span class="pill-role">Teacher <small>(Phone)</small></span>
+                <span class="pill-id">+1 800-555-0201</span>
+              </div>
             </button>
-            <button class="role-pill admin-pill" onclick="quickLogin('admin@academy.edu', 'admin123')">
-              <i class="fa-solid fa-shield-halved"></i> Admin
+            <button class="role-pill parent-pill" onclick="quickLogin('robert@academy.edu', 'parent123', 'parent')" title="Robert Vance (Parent)">
+              <i class="fa-solid fa-person-shelter"></i>
+              <div class="pill-text">
+                <span class="pill-role">Parent</span>
+                <span class="pill-id">robert@academy.edu</span>
+              </div>
+            </button>
+            <button class="role-pill admin-pill" onclick="quickLogin('+1 800-555-0100', 'admin123', 'admin')" title="Admin (Phone: +1 800-555-0100)">
+              <i class="fa-solid fa-shield-halved"></i>
+              <div class="pill-text">
+                <span class="pill-role">Admin <small>(Phone)</small></span>
+                <span class="pill-id">+1 800-555-0100</span>
+              </div>
             </button>
           </div>
         </div>
 
+        <!-- Login Method Toggle Tabs -->
+        <div class="login-tab-wrapper">
+          <button type="button" class="login-tab-btn active" id="tabEmailMode" onclick="App.setLoginMode('email')">
+            <i class="fa-solid fa-envelope"></i> Email
+          </button>
+          <button type="button" class="login-tab-btn" id="tabPhoneMode" onclick="App.setLoginMode('phone')">
+            <i class="fa-solid fa-phone"></i> Phone Number
+          </button>
+        </div>
+
         <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="login-form">
           <div class="form-group">
-            <label for="loginEmail"><i class="fa-solid fa-envelope"></i> Email Address</label>
-            <input type="email" id="loginEmail" placeholder="alex@academy.edu" required>
+            <label for="loginIdentifier" id="loginLabel">
+              <i class="fa-solid fa-envelope" id="loginLabelIcon"></i>
+              <span id="loginLabelText">Email Address</span>
+            </label>
+            <div class="input-with-icon">
+              <input type="text" id="loginIdentifier" placeholder="alex@academy.edu" required autocomplete="username">
+              <span class="input-badge" id="loginTypeBadge">Email</span>
+            </div>
+            <span class="input-hint" id="loginHint">Enter your registered email address or phone number</span>
           </div>
+          
           <div class="form-group">
             <label for="loginPassword"><i class="fa-solid fa-lock"></i> Password</label>
-            <input type="password" id="loginPassword" placeholder="••••••••" required>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
           </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            <span>Sign In</span> <i class="fa-solid fa-arrow-right"></i>
+          
+          <button type="submit" class="btn btn-primary btn-block" id="btnLoginSubmit">
+            <span>Sign In to Academy</span> <i class="fa-solid fa-arrow-right"></i>
           </button>
         </form>
 
         <div class="login-footer">
-          <p>Powered by FastAPI & Flutter DevOps Engine</p>
+          <p><i class="fa-solid fa-shield-check"></i> Catalyst DevOps &bull; Secure Authentication</p>
         </div>
       </section>
 
       <!-- 3. MAIN DASHBOARD SCREEN (Multi-Role) -->
       <section id="dashboardScreen" class="screen hidden">
         <!-- App Top Header -->
+        <!-- App Top Header (Styled after Reference Image) -->
         <header class="app-header">
           <div class="user-info">
-            <div class="user-avatar" id="userAvatar">A</div>
+            <div class="user-avatar-wrap">
+              <div class="user-avatar" id="userAvatar">A</div>
+              <span class="online-dot"></span>
+            </div>
             <div class="user-details">
-              <h3 id="userName">Alex Vance</h3>
-              <span class="user-role-badge" id="userRoleBadge">Student</span>
+              <span class="user-greeting" id="userGreeting">Good morning,</span>
+              <h3 id="userName">Alex Vance <span class="role-tag-pill" id="userRoleBadge">STUDENT</span></h3>
             </div>
           </div>
           <div class="header-actions">
-            <button class="icon-btn" onclick="toggleNotificationsModal()">
+            <!-- Header Theme Switcher -->
+            <button class="icon-btn theme-btn" onclick="Theme.toggle()" title="Toggle Theme" id="headerThemeBtn">
+              <i class="fa-solid fa-moon theme-icon-display"></i>
+            </button>
+            <button class="icon-btn" onclick="toggleNotificationsModal()" title="Notifications">
               <i class="fa-solid fa-bell"></i>
               <span class="badge-dot" id="notifBadge"></span>
             </button>
@@ -118,12 +195,20 @@
 
         <!-- Role Context Switcher Bar -->
         <div class="role-switcher-bar">
-          <span>Switch Role View:</span>
+          <span class="role-switcher-lbl">View:</span>
           <div class="mini-switcher">
             <button onclick="switchRoleView('student')" id="btnRoleStudent" class="mini-btn">Student</button>
             <button onclick="switchRoleView('teacher')" id="btnRoleTeacher" class="mini-btn">Teacher</button>
             <button onclick="switchRoleView('parent')" id="btnRoleParent" class="mini-btn">Parent</button>
             <button onclick="switchRoleView('admin')" id="btnRoleAdmin" class="mini-btn">Admin</button>
+          </div>
+        </div>
+
+        <!-- Search Bar (matching reference mockup) -->
+        <div class="search-container">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="mainSearchInput" placeholder="Search courses, quizzes, assignments..." oninput="Dashboards.handleSearch(this.value)">
           </div>
         </div>
 
@@ -142,9 +227,13 @@
             <i class="fa-solid fa-book-open"></i>
             <span>Courses</span>
           </button>
+          <button class="nav-item" onclick="switchNavTab('attendance')" id="navAttendance">
+            <i class="fa-solid fa-clipboard-user"></i>
+            <span>Attendance</span>
+          </button>
           <button class="nav-item" onclick="switchNavTab('quiz')" id="navQuiz">
             <i class="fa-solid fa-brain"></i>
-            <span>Quiz</span>
+            <span>Quizzes</span>
           </button>
           <button class="nav-item" onclick="switchNavTab('profile')" id="navProfile">
             <i class="fa-solid fa-user"></i>
@@ -155,12 +244,19 @@
 
     </main>
 
+    <!-- Toast Notification Banner -->
+    <div id="toastNotification" class="toast-notification hidden">
+      <i class="toast-icon fa-solid fa-circle-check"></i>
+      <span class="toast-msg">Operation completed</span>
+    </div>
+
     <!-- Interactive Modals -->
-    <!-- 1. Quiz Runner Modal -->
+    
+    <!-- 1. Quiz Runner Modal (For Taking Quizzes) -->
     <div class="modal-overlay hidden" id="quizModal">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 id="quizModalTitle">Interactive Quiz Engine</h3>
+          <h3 id="quizModalTitle"><i class="fa-solid fa-brain"></i> Interactive Quiz Engine</h3>
           <button class="close-btn" onclick="closeModal('quizModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body" id="quizModalBody">
@@ -169,11 +265,78 @@
       </div>
     </div>
 
-    <!-- 2. Attendance Modal -->
+    <!-- 2. Quiz Editor Modal (For Creation & Updation) -->
+    <div class="modal-overlay hidden" id="quizEditorModal">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <h3 id="quizEditorTitle"><i class="fa-solid fa-pen-ruler"></i> Create New Quiz</h3>
+          <button class="close-btn" onclick="closeModal('quizEditorModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <form id="quizEditorForm" onsubmit="Dashboards.handleSaveQuiz(event)">
+            <input type="hidden" id="quizEditId" value="">
+            
+            <div class="form-group">
+              <label for="quizFormTitle"><i class="fa-solid fa-heading"></i> Quiz Title</label>
+              <input type="text" id="quizFormTitle" placeholder="e.g. CI/CD Pipelines & Docker Basics" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="quizFormCourse"><i class="fa-solid fa-book"></i> Course</label>
+                <select id="quizFormCourse" required>
+                  <option value="1">PY201: FastAPI & Python Backend Architecture</option>
+                  <option value="2">DOV301: DevOps & Cloud Automation</option>
+                  <option value="3">FLT101: Flutter Cross-Platform Mastery</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="quizFormDuration"><i class="fa-regular fa-clock"></i> Duration (Mins)</label>
+                <input type="number" id="quizFormDuration" min="5" max="180" value="20" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="quizFormMarks"><i class="fa-solid fa-star"></i> Total Marks</label>
+                <input type="number" id="quizFormMarks" min="10" max="200" value="100" required>
+              </div>
+              <div class="form-group">
+                <label for="quizFormActive"><i class="fa-solid fa-toggle-on"></i> Status</label>
+                <select id="quizFormActive">
+                  <option value="true">Active (Visible to Students)</option>
+                  <option value="false">Draft / Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="editor-section-header">
+              <h4><i class="fa-solid fa-list-check"></i> Questions (<span id="questionCountBadge">1</span>)</h4>
+              <button type="button" class="btn btn-sm btn-outline" onclick="Dashboards.addQuestionField()">
+                <i class="fa-solid fa-plus"></i> Add Question
+              </button>
+            </div>
+
+            <div id="quizQuestionsContainer" class="questions-builder-list">
+              <!-- Dynamic Questions added here -->
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal('quizEditorModal')">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitQuizForm">
+                <i class="fa-solid fa-floppy-disk"></i> <span id="btnSaveQuizText">Save Quiz</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Attendance Modal -->
     <div class="modal-overlay hidden" id="attendanceModal">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>Mark Class Attendance</h3>
+          <h3><i class="fa-solid fa-clipboard-user"></i> Mark Class Attendance</h3>
           <button class="close-btn" onclick="closeModal('attendanceModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body" id="attendanceModalBody">
@@ -182,11 +345,11 @@
       </div>
     </div>
 
-    <!-- 3. Homework Modal -->
+    <!-- 4. Homework Modal -->
     <div class="modal-overlay hidden" id="homeworkModal">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 id="hwModalTitle">Submit Homework Assignment</h3>
+          <h3 id="hwModalTitle"><i class="fa-solid fa-file-pen"></i> Submit Homework Assignment</h3>
           <button class="close-btn" onclick="closeModal('homeworkModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body" id="homeworkModalBody">
@@ -195,15 +358,30 @@
       </div>
     </div>
 
-    <!-- 4. Notifications Modal -->
+    <!-- 5. Notifications Modal -->
     <div class="modal-overlay hidden" id="notifModal">
       <div class="modal-card">
         <div class="modal-header">
-          <h3>Notifications & Alerts</h3>
+          <h3><i class="fa-solid fa-bell"></i> Notifications & Alerts</h3>
           <button class="close-btn" onclick="closeModal('notifModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body" id="notifModalBody">
           <!-- Notifications render here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Action Modal -->
+    <div class="modal-overlay hidden" id="confirmModal" style="z-index: 150;">
+      <div class="modal-card" style="max-height: 250px; text-align: center; padding: 18px 20px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(244,63,94,0.15); color: var(--accent-rose); display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 10px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 id="confirmTitle" style="font-size: 15px; margin-bottom: 4px; font-family: var(--font-heading);">Confirm Action</h3>
+        <p id="confirmMessage" style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Are you sure you want to proceed?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnConfirmCancel">Cancel</button>
+          <button type="button" class="btn btn-danger btn-sm" id="btnConfirmAction">Yes, Delete</button>
         </div>
       </div>
     </div>

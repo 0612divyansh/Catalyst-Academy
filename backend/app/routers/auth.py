@@ -41,13 +41,33 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 
     return user
 
+import re
+
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    identifier = form_data.username.strip()
+    norm_identifier = re.sub(r"[^\d]", "", identifier)
+
+    # 1. Direct email match
+    user = db.query(models.User).filter(models.User.email.ilike(identifier)).first()
+
+    # 2. Direct phone match
+    if not user:
+        user = db.query(models.User).filter(models.User.phone == identifier).first()
+
+    # 3. Normalized phone match (e.g. ignoring spaces, dashes, country code prefix)
+    if not user and len(norm_identifier) >= 7:
+        users_with_phone = db.query(models.User).filter(models.User.phone.isnot(None)).all()
+        for u in users_with_phone:
+            u_digits = re.sub(r"[^\d]", "", u.phone or "")
+            if u_digits and (u_digits == norm_identifier or u_digits.endswith(norm_identifier) or norm_identifier.endswith(u_digits)):
+                user = u
+                break
+
     if not user or not auth_service.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect email, phone number, or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

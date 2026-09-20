@@ -50,6 +50,60 @@ def create_quiz(
     db.refresh(new_quiz)
     return new_quiz
 
+@router.put("/{quiz_id}", response_model=schemas.QuizOut)
+def update_quiz(
+    quiz_id: int,
+    quiz_data: schemas.QuizUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_service.require_role(["teacher", "admin"]))
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    if quiz_data.title is not None:
+        quiz.title = quiz_data.title
+    if quiz_data.course_id is not None:
+        quiz.course_id = quiz_data.course_id
+    if quiz_data.total_marks is not None:
+        quiz.total_marks = quiz_data.total_marks
+    if quiz_data.duration_minutes is not None:
+        quiz.duration_minutes = quiz_data.duration_minutes
+    if quiz_data.is_active is not None:
+        quiz.is_active = quiz_data.is_active
+
+    if quiz_data.questions is not None:
+        db.query(models.Question).filter(models.Question.quiz_id == quiz.id).delete()
+        for q in quiz_data.questions:
+            question = models.Question(
+                quiz_id=quiz.id,
+                text=q.text,
+                question_type=q.question_type,
+                options_json=json.dumps(q.options),
+                correct_answer=q.correct_answer
+            )
+            db.add(question)
+
+    db.commit()
+    db.refresh(quiz)
+    return quiz
+
+@router.delete("/{quiz_id}")
+def delete_quiz(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_service.require_role(["teacher", "admin"]))
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    db.query(models.QuizResult).filter(models.QuizResult.quiz_id == quiz.id).delete()
+    db.query(models.Question).filter(models.Question.quiz_id == quiz.id).delete()
+    db.delete(quiz)
+    db.commit()
+    return {"message": "Quiz deleted successfully", "id": quiz_id}
+
 @router.post("/submit", response_model=schemas.QuizResultOut)
 def submit_quiz(
     submission: schemas.QuizSubmit,
