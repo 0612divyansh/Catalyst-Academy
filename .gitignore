@@ -7,3 +7,6 @@ venv/
 env/
 .DS_Store
 *.db
+android-build/
+*.idsig
+
